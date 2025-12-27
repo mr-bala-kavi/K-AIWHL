@@ -99,3 +99,54 @@ export const oauthAPI = {
         return response.data;
     },
 };
+
+// Challenges API
+export const challengesAPI = {
+    list: async (category?: string, difficulty?: string) => {
+        const params: any = {};
+        if (category) params.category = category;
+        if (difficulty) params.difficulty = difficulty;
+
+        const response = await apiClient.get('/api/challenges', { params });
+        return response.data;
+    },
+
+    getChallenge: async (challengeId: string) => {
+        const response = await apiClient.get(`/api/challenges/${challengeId}`);
+        return response.data;
+    },
+
+    submitFlag: async (challengeId: string, flag: string, usedHint: boolean = false) => {
+        const response = await apiClient.post('/api/challenges/submit-flag', {
+            challenge_id: challengeId,
+            flag,
+            used_hint: usedHint
+        });
+        return response.data;
+    },
+
+    getHint: async (challengeId: string, hintNumber: number) => {
+        const response = await apiClient.post(`/api/challenges/${challengeId}/hint`, null, {
+            params: { hint_number: hintNumber }
+        });
+        return response.data;
+    },
+};
+
+// Progress API
+export const progressAPI = {
+    getProgress: async (userId: string = 'default_user') => {
+        const response = await apiClient.get(`/api/progress/${userId}`);
+        return response.data;
+    },
+};
+
+// Leaderboard API
+export const leaderboardAPI = {
+    get: async (limit: number = 10) => {
+        const response = await apiClient.get('/api/leaderboard', {
+            params: { limit }
+        });
+        return response.data;
+    },
+};

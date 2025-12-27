@@ -9,7 +9,7 @@ app = FastAPI(title="K-AIWHL v2.0 - DVWA-Style CTF", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -74,8 +74,8 @@ async def root():
         "name": "K-AIWHL v2.0",
         "version": "2.0.0",
         "description": "DVWA-Style Modern Penetration Testing Lab",
-        "total_challenges": 25,
-        "total_points": 1100,
+        "total_challenges": 25,  # All challenges implemented
+        "total_points": 1100,  # 5 low (50) + 10 medium (250) + 6 high (300) + 4 extreme (400) = 1100
         "categories": ["authentication", "injection", "file", "llm", "access_control", "ssrf"],
         "difficulty_levels": ["low", "medium", "high", "extreme"],
         "endpoints": {

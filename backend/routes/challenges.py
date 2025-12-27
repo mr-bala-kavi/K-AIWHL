@@ -6,55 +6,70 @@ from typing import List
 router = APIRouter()
 
 # Flags registry - embedded directly (no file loading)
+# Total: 25 challenges, 1100 points
 FLAGS_REGISTRY = {
+    # Authentication & Sessions (5 challenges - 210 pts)
     "auth_sql_low": {"flag": "flag{AUTH_L1_sql_1nj3ct_l0g1n}", "points": 10, "category": "authentication", "difficulty": "low"},
     "auth_sql_medium": {"flag": "flag{AUTH_M1_bl1nd_sqli_h4sh}", "points": 25, "category": "authentication", "difficulty": "medium"},
-    "idor_low": {"flag": "flag{IDOR_L1_us3r_4cc3ss}", "points": 10, "category": "access_control", "difficulty": "low"},
-    "mass_assign_medium": {"flag": "flag{MASS_M1_4ss1gn_pwn}", "points": 25, "category": "access_control", "difficulty": "medium"},
-    "ssrf_internal_medium": {"flag": "flag{SSRF_M1_1nt3rn4l_4p1}", "points": 25, "category": "ssrf", "difficulty": "medium"},
+    "auth_second_order_high": {"flag": "flag{AUTH_H1_s3c0nd_0rd3r_pwn}", "points": 50, "category": "authentication", "difficulty": "high"},
+    "session_fixation_medium": {"flag": "flag{SESS_M1_f1x4t10n_pwn3d}", "points": 25, "category": "authentication", "difficulty": "medium"},
+    "jwt_race_high": {"flag": "flag{JWT_H1_r4c3_c0nd1t10n}", "points": 50, "category": "authentication", "difficulty": "high"},
+    
+    # Injection Attacks (5 challenges - 245 pts)
+    "cmd_injection_low": {"flag": "flag{CMD_L1_p1ng_1nj3ct10n}", "points": 10, "category": "injection", "difficulty": "low"},
+    "nosql_blind_medium": {"flag": "flag{NOSQL_M1_bl1nd_1nj3ct}", "points": 25, "category": "injection", "difficulty": "medium"},
+    "ldap_injection_high": {"flag": "flag{LDAP_H1_d1r3ct0ry_pwn}", "points": 50, "category": "injection", "difficulty": "high"},
+    "xxe_extreme": {"flag": "flag{XXE_E1_1nt3rn4l_f1l3s}", "points": 100, "category": "injection", "difficulty": "extreme"},
+    "ssti_medium": {"flag": "flag{SSTI_M1_t3mpl4t3_pwn}", "points": 25, "category": "injection", "difficulty": "medium"},
+    
+    # File & Upload (4 challenges - 185 pts)
     "upload_low": {"flag": "flag{UPLOAD_L1_unr3str1ct3d}", "points": 10, "category": "file", "difficulty": "low"},
     "lfi_medium": {"flag": "flag{LFI_M1_l0c4l_f1l3_r34d}", "points": 25, "category": "file", "difficulty": "medium"},
+    "rfi_high": {"flag": "flag{RFI_H1_r3m0t3_c0d3_3x3c}", "points": 50, "category": "file", "difficulty": "high"},
+    "polyglot_extreme": {"flag": "flag{POL_E1_p0lygl0t_byp4ss}", "points": 100, "category": "file", "difficulty": "extreme"},
+    
+    # LLM/AI Security (4 challenges - 185 pts)
     "llm_prompt_low": {"flag": "flag{LLM_L1_pr0mpt_l34k}", "points": 10, "category": "llm", "difficulty": "low"},
-   "llm_jailbreak_medium": {"flag": "flag{LLM_M1_j41lbr34k_pwn}", "points": 25, "category": "llm", "difficulty": "medium"},
+    "llm_jailbreak_medium": {"flag": "flag{LLM_M1_j41lbr34k_pwn}", "points": 25, "category": "llm", "difficulty": "medium"},
+    "rag_poisoning_high": {"flag": "flag{RAG_H1_p0is0n_r3tr13v3}", "points": 50, "category": "llm", "difficulty": "high"},
+    "context_smuggling_extreme": {"flag": "flag{CTX_E1_c0nt3xt_smug}", "points": 100, "category": "llm", "difficulty": "extreme"},
+    
+    # Access Control (4 challenges - 185 pts)
+    "idor_low": {"flag": "flag{IDOR_L1_us3r_4cc3ss}", "points": 10, "category": "access_control", "difficulty": "low"},
+    "mass_assign_medium": {"flag": "flag{MASS_M1_4ss1gn_pwn}", "points": 25, "category": "access_control", "difficulty": "medium"},
+    "race_condition_high": {"flag": "flag{PRIV_H1_r4c3_3sc4l4t3}", "points": 50, "category": "access_control", "difficulty": "high"},
+    "oauth_csrf_extreme": {"flag": "flag{OAUTH_E1_t0k3n_ch41n}", "points": 100, "category": "access_control", "difficulty": "extreme"},
+    
+    # SSRF & Network (3 challenges - 175 pts)
+    "ssrf_internal_medium": {"flag": "flag{SSRF_M1_1nt3rn4l_4p1}", "points": 25, "category": "ssrf", "difficulty": "medium"},
+    "crlf_injection_high": {"flag": "flag{CRLF_H1_h34d3r_1nj3ct}", "points": 50, "category": "ssrf", "difficulty": "high"},
+    "cloud_metadata_extreme": {"flag": "flag{CLOUD_E1_m3t4d4t4_pwn}", "points": 100, "category": "ssrf", "difficulty": "extreme"},
 }
 
-# Challenge definitions
-CHALLENGES = {
-    # Authentication challenges
-    "auth_sql_low": Challenge(
-        id="auth_sql_low",
-        title="SQL Injection - Authentication Bypass",
-        category=Category.AUTHENTICATION,
-        difficulty=DifficultyLevel.LOW,
-        points=10,
-        description="The login form is vulnerable to SQL injection. Can you bypass authentication?",
-        objective="Login as admin without knowing the password",
-        hints=[
-            "Try using SQL operators like OR, AND",
-            "The classic payload is: admin' OR '1'='1",
-            "You need to comment out the rest of the query with -- or #"
-        ],
-        tools_needed=["Burp Suite", "Browser"],
-        endpoint="/challenges/auth/login"
-    ),
-    "auth_sql_medium": Challenge(
-        id="auth_sql_medium",
-        title="Blind SQL Injection - Data Extraction",
-        category=Category.AUTHENTICATION,
-        difficulty=DifficultyLevel.MEDIUM,
-        points=25,
-        description="Extract the admin password hash using blind SQL injection",
-        objective="Find the flag hidden in admin_secrets table",
-        hints=[
-            "Use boolean-based blind SQLi with SUBSTRING",
-            "Try: ' AND (SELECT SUBSTRING(value,1,1) FROM admin_secrets WHERE key='flag')='f'--",
-            "Use sqlmap: sqlmap -u URL --data='query=test' --dump -T admin_secrets"
-        ],
-        tools_needed=["Burp Suite", "sqlmap", "Python"],
-        endpoint="/challenges/auth/search"
-    ),
-    # Add more challenge definitions...
-}
+# Import all challenge definitions from modular files
+try:
+    from routes.challenge_definitions.auth_challenges_def import AUTH_CHALLENGES
+    from routes.challenge_definitions.injection_challenges_def import INJECTION_CHALLENGES
+    from routes.challenge_definitions.file_challenges_def import FILE_CHALLENGES
+    from routes.challenge_definitions.llm_challenges_def import LLM_CHALLENGES
+    from routes.challenge_definitions.access_challenges_def import ACCESS_CHALLENGES
+    from routes.challenge_definitions.ssrf_challenges_def import SSRF_CHALLENGES
+    
+    # Merge all challenges into single dictionary
+    CHALLENGES = {
+        **AUTH_CHALLENGES,      # 5 challenges - 210 pts
+        **INJECTION_CHALLENGES, # 5 challenges - 245 pts  
+        **FILE_CHALLENGES,      # 4 challenges - 185 pts
+        **LLM_CHALLENGES,       # 4 challenges - 185 pts
+        **ACCESS_CHALLENGES,    # 4 challenges - 185 pts
+        **SSRF_CHALLENGES,      # 3 challenges - 175 pts
+    }
+    # Total: 25 challenges, 1100 points
+    
+except ImportError as e:
+    print(f"Warning: Could not import challenge definitions: {e}")
+    # Fallback: minimal challenges dict
+    CHALLENGES = {}
 
 @router.get("/challenges", response_model=List[Challenge])
 async def list_challenges(

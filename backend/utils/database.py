@@ -10,3 +10,4 @@ db = client.get_database()
 users_collection = db["users"]
 sessions_collection = db["sessions"]
 oauth_states = db["oauth_states"]
+user_progress = db["user_progress"]

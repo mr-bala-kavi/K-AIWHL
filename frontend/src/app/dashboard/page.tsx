@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatInterface from '@/components/ChatInterface';
-import { fetchAPI, profileAPI, uploadAPI, oauthAPI } from '@/lib/api';
+import { fetchAPI, profileAPI, uploadAPI, oauthAPI, challengesAPI, progressAPI, leaderboardAPI } from '@/lib/api';
 
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState('chat');
+    const [activeTab, setActiveTab] = useState('overview');
     const [ssrfUrl, setSsrfUrl] = useState('');
     const [ssrfResult, setSsrfResult] = useState('');
     const [profileId, setProfileId] = useState('1');
@@ -14,6 +14,38 @@ export default function Dashboard() {
     const [uploadType, setUploadType] = useState('pickle');
     const [uploadResult, setUploadResult] = useState('');
     const [oauthResult, setOauthResult] = useState('');
+
+    // New state for progress and challenges
+    const [userProgress, setUserProgress] = useState<any>(null);
+    const [challenges, setChallenges] = useState<any[]>([]);
+    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [selectedChallenge, setSelectedChallenge] = useState<any>(null);
+    const [flagInput, setFlagInput] = useState('');
+    const [flagResult, setFlagResult] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    // Load all data on mount
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [progressData, challengesData, leaderboardData] = await Promise.all([
+                    progressAPI.getProgress('default_user'),
+                    challengesAPI.list(),
+                    leaderboardAPI.get(10)
+                ]);
+
+                setUserProgress(progressData);
+                setChallenges(challengesData);
+                setLeaderboard(leaderboardData.leaderboard || []);
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, []);
 
     const handleSSRF = async () => {
         try {
@@ -53,6 +85,45 @@ export default function Dashboard() {
         }
     };
 
+    const handleFlagSubmit = async () => {
+        if (!selectedChallenge || !flagInput.trim()) return;
+
+        try {
+            const result = await challengesAPI.submitFlag(selectedChallenge.id, flagInput.trim(), false);
+            setFlagResult(JSON.stringify(result, null, 2));
+
+            // Refresh progress if flag was correct
+            if (result.correct) {
+                const updatedProgress = await progressAPI.getProgress('default_user');
+                setUserProgress(updatedProgress);
+                setFlagInput('');
+            }
+        } catch (error: any) {
+            setFlagResult('Error: ' + error.message);
+        }
+    };
+
+    // Helper function to get difficulty color
+    const getDifficultyColor = (difficulty: string) => {
+        switch (difficulty.toLowerCase()) {
+            case 'low': return '#4caf50';
+            case 'medium': return '#ff9800';
+            case 'high': return '#f44336';
+            case 'extreme': return '#9c27b0';
+            default: return '#666';
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={styles.container}>
+                <div style={{ textAlign: 'center', padding: '50px' }}>
+                    <h2>Loading dashboard...</h2>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={styles.container}>
             <div style={styles.header}>
@@ -60,8 +131,30 @@ export default function Dashboard() {
                 <a href="/" style={styles.homeLink}>← Home</a>
             </div>
 
+            {/* User Stats Panel */}
+            <div style={styles.statsPanel}>
+                <div style={styles.statCard}>
+                    <div style={styles.statValue}>{userProgress?.total_points || 0}</div>
+                    <div style={styles.statLabel}>Points Earned</div>
+                </div>
+                <div style={styles.statCard}>
+                    <div style={styles.statValue}>{userProgress?.solved_challenges?.length || 0}</div>
+                    <div style={styles.statLabel}>Challenges Solved</div>
+                </div>
+                <div style={styles.statCard}>
+                    <div style={styles.statValue}>{challenges.length || 0}</div>
+                    <div style={styles.statLabel}>Total Challenges</div>
+                </div>
+                <div style={styles.statCard}>
+                    <div style={styles.statValue}>
+                        {challenges.length > 0 ? Math.round((userProgress?.solved_challenges?.length || 0) / challenges.length * 100) : 0}%
+                    </div>
+                    <div style={styles.statLabel}>Completion Rate</div>
+                </div>
+            </div>
+
             <div style={styles.tabs}>
-                {['chat', 'ssrf', 'idor', 'upload', 'oauth'].map(tab => (
+                {['overview', 'challenges', 'leaderboard', 'chat', 'ssrf', 'idor', 'upload', 'oauth'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -73,6 +166,139 @@ export default function Dashboard() {
             </div>
 
             <div style={styles.content}>
+                {activeTab === 'overview' && (
+                    <div>
+                        <h2>📊 Your Progress</h2>
+                        <div style={styles.panel}>
+                            <h3>🎯 Stats</h3>
+                            <p>Username: <strong>{userProgress?.username || 'default_user'}</strong></p>
+                            <p>Total Points: <strong style={{ color: '#667eea', fontSize: '24px' }}>{userProgress?.total_points || 0}</strong></p>
+                            <p>Challenges Solved: <strong>{userProgress?.solved_challenges?.length || 0}/{challenges.length}</strong></p>
+                            <p>Hints Used: <strong>{userProgress?.hints_used || 0}</strong></p>
+
+                            <h3 style={{ marginTop: '30px' }}>✅ Completed Challenges</h3>
+                            {userProgress?.solved_challenges?.length > 0 ? (
+                                <ul style={{ listStyle: 'none', padding: 0 }}>
+                                    {userProgress.solved_challenges.map((id: string) => {
+                                        const challenge = challenges.find(c => c.id === id);
+                                        return challenge ? (
+                                            <li key={id} style={{ padding: '8px', background: '#f0f0f0', margin: '5px 0', borderRadius: '4px' }}>
+                                                ✓ {challenge.title} ({challenge.points} points)
+                                            </li>
+                                        ) : null;
+                                    })}
+                                </ul>
+                            ) : (
+                                <p style={{ color: '#666' }}>No challenges solved yet. Start exploring!</p>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'challenges' && (
+                    <div>
+                        <h2>🎯 All Challenges</h2>
+                        <div style={styles.panel}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <p style={styles.hint}>
+                                    Select a challenge to view details and submit flags.
+                                    Total: {challenges.length} challenges | Solved: {userProgress?.solved_challenges?.length || 0}
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' }}>
+                                {challenges.map((challenge: any) => {
+                                    const isSolved = userProgress?.solved_challenges?.includes(challenge.id);
+                                    return (
+                                        <div
+                                            key={challenge.id}
+                                            onClick={() => setSelectedChallenge(challenge)}
+                                            style={{
+                                                ...styles.challengeCard,
+                                                border: selectedChallenge?.id === challenge.id ? '3px solid #667eea' : '1px solid #ddd',
+                                                background: isSolved ? '#e8f5e9' : 'white'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                                <h3 style={{ margin: 0, fontSize: '16px', flex: 1 }}>
+                                                    {isSolved && '✅ '}{challenge.title}
+                                                </h3>
+                                                <span style={{ ...styles.badge, background: getDifficultyColor(challenge.difficulty) }}>
+                                                    {challenge.difficulty}
+                                                </span>
+                                            </div>
+                                            <p style={{ fontSize: '12px', color: '#666', margin: '8px 0' }}>{challenge.category}</p>
+                                            <p style={{ fontSize: '14px', margin: '8px 0' }}>{challenge.description}</p>
+                                            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#667eea', marginTop: '10px' }}>
+                                                {challenge.points} points
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {selectedChallenge && (
+                                <div style={{ ...styles.panel, marginTop: '30px', background: '#f8f9fa' }}>
+                                    <h3>📋 {selectedChallenge.title}</h3>
+                                    <p><strong>Category:</strong> {selectedChallenge.category}</p>
+                                    <p><strong>Difficulty:</strong> {selectedChallenge.difficulty}</p>
+                                    <p><strong>Points:</strong> {selectedChallenge.points}</p>
+                                    <p><strong>Objective:</strong> {selectedChallenge.objective}</p>
+                                    <p><strong>Endpoint:</strong> <code>{selectedChallenge.endpoint}</code></p>
+
+                                    <div style={{ marginTop: '20px' }}>
+                                        <h4>🚩 Submit Flag</h4>
+                                        <input
+                                            type="text"
+                                            placeholder="flag{...}"
+                                            value={flagInput}
+                                            onChange={(e) => setFlagInput(e.target.value)}
+                                            style={styles.input}
+                                        />
+                                        <button onClick={handleFlagSubmit} style={styles.button}>Submit Flag</button>
+                                        {flagResult && (
+                                            <pre style={styles.result}>{flagResult}</pre>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'leaderboard' && (
+                    <div>
+                        <h2>🏆 Leaderboard</h2>
+                        <div style={styles.panel}>
+                            <p style={styles.hint}>Top 10 hackers by points earned</p>
+                            {leaderboard.length > 0 ? (
+                                <table style={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th style={styles.th}>Rank</th>
+                                            <th style={styles.th}>Username</th>
+                                            <th style={styles.th}>Points</th>
+                                            <th style={styles.th}>Challenges Solved</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {leaderboard.map((user: any, index: number) => (
+                                            <tr key={user.user_id} style={index % 2 === 0 ? { background: '#f9f9f9' } : {}}>
+                                                <td style={styles.td}>{index + 1}</td>
+                                                <td style={styles.td}>{user.username || user.user_id}</td>
+                                                <td style={styles.td}><strong>{user.total_points}</strong></td>
+                                                <td style={styles.td}>{user.solved_challenges?.length || 0}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <p>No leaderboard data yet. Be the first to solve challenges!</p>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'chat' && (
                     <div>
                         <h2>🤖 AI Chat Interface</h2>
@@ -244,5 +470,62 @@ const styles = {
         overflow: 'auto',
         maxHeight: '400px',
         border: '1px solid #ddd',
+    },
+    statsPanel: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '15px',
+        marginBottom: '20px',
+    },
+    statCard: {
+        background: 'white',
+        padding: '20px',
+        borderRadius: '8px',
+        textAlign: 'center' as const,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        border: '2px solid #667eea',
+    },
+    statValue: {
+        fontSize: '32px',
+        fontWeight: 'bold',
+        color: '#667eea',
+        marginBottom: '8px',
+    },
+    statLabel: {
+        fontSize: '14px',
+        color: '#666',
+        textTransform: 'uppercase' as const,
+        letterSpacing: '0.5px',
+    },
+    challengeCard: {
+        padding: '15px',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+    },
+    badge: {
+        padding: '4px 8px',
+        borderRadius: '4px',
+        fontSize: '11px',
+        fontWeight: 'bold',
+        color: 'white',
+        textTransform: 'uppercase' as const,
+        marginLeft: '8px',
+    },
+    table: {
+        width: '100%',
+        borderCollapse: 'collapse' as const,
+        marginTop: '20px',
+    },
+    th: {
+        padding: '12px',
+        textAlign: 'left' as const,
+        background: '#667eea',
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    td: {
+        padding: '12px',
+        borderBottom: '1px solid #ddd',
     },
 };
