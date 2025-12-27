@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import ChatInterface from '@/components/ChatInterface';
@@ -125,7 +125,7 @@ export default function Dashboard() {
     return (
         <div style={styles.container}>
             <div style={styles.header}>
-                <h1 style={styles.title}>🎯 K-AIWHL Dashboard</h1>
+                <h1 style={styles.title}>K-AIWHL Dashboard</h1>
                 <a href="/" style={styles.homeLink}>← Home</a>
             </div>
 
@@ -152,7 +152,7 @@ export default function Dashboard() {
             </div>
 
             <div style={styles.tabs}>
-                {['overview', 'challenges', 'leaderboard', 'chat', 'ssrf', 'idor', 'upload', 'oauth'].map(tab => (
+                {['overview', 'challenges', 'chat', 'ssrf', 'idor', 'upload', 'oauth'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -168,20 +168,20 @@ export default function Dashboard() {
                     <div>
                         <h2>📊 Your Progress</h2>
                         <div style={styles.panel}>
-                            <h3>🎯 Stats</h3>
+                            <h3>📈 Stats</h3>
                             <p>Username: <strong>{userProgress?.username || 'default_user'}</strong></p>
                             <p>Total Points: <strong style={{ color: '#667eea', fontSize: '24px' }}>{userProgress?.total_points || 0}</strong></p>
                             <p>Challenges Solved: <strong>{userProgress?.solved_challenges?.length || 0}/{challenges.length}</strong></p>
                             <p>Hints Used: <strong>{userProgress?.hints_used || 0}</strong></p>
 
-                            <h3 style={{ marginTop: '30px' }}>✅ Completed Challenges</h3>
+                            <h3 style={{ marginTop: '30px' }}>Γ£à Completed Challenges</h3>
                             {userProgress?.solved_challenges?.length > 0 ? (
                                 <ul style={{ listStyle: 'none', padding: 0 }}>
                                     {userProgress.solved_challenges.map((id: string) => {
                                         const challenge = challenges.find(c => c.id === id);
                                         return challenge ? (
                                             <li key={id} style={{ padding: '8px', background: '#f0f0f0', margin: '5px 0', borderRadius: '4px' }}>
-                                                ✓ {challenge.title} ({challenge.points} points)
+                                                Γ£ô {challenge.title} ({challenge.points} points)
                                             </li>
                                         ) : null;
                                     })}
@@ -219,7 +219,7 @@ export default function Dashboard() {
                                         >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                                 <h3 style={{ margin: 0, fontSize: '16px', flex: 1 }}>
-                                                    {isSolved && '✅ '}{challenge.title}
+                                                    {isSolved && 'Γ£à '}{challenge.title}
                                                 </h3>
                                                 <span style={{ ...styles.badge, background: getDifficultyColor(challenge.difficulty) }}>
                                                     {challenge.difficulty}
@@ -237,7 +237,7 @@ export default function Dashboard() {
 
                             {selectedChallenge && (
                                 <div style={{ ...styles.panel, marginTop: '30px', background: '#f8f9fa' }}>
-                                    <h3>📋 {selectedChallenge.title}</h3>
+                                    <h3>📝 {selectedChallenge.title}</h3>
                                     <p><strong>Category:</strong> {selectedChallenge.category}</p>
                                     <p><strong>Difficulty:</strong> {selectedChallenge.difficulty}</p>
                                     <p><strong>Points:</strong> {selectedChallenge.points}</p>
@@ -311,7 +311,7 @@ export default function Dashboard() {
 
                 {activeTab === 'upload' && (
                     <div style={styles.panel}>
-                        <h2>📤 File Upload (RCE Test)</h2>
+                        <h2>📁 File Upload (RCE Test)</h2>
                         <p style={styles.hint}>Upload malicious pickle, YAML, or config files</p>
                         <input
                             type="file"
@@ -336,7 +336,7 @@ export default function Dashboard() {
 
                 {activeTab === 'oauth' && (
                     <div style={styles.panel}>
-                        <h2>🔑 OAuth Test (Broken State)</h2>
+                        <h2>🔐 OAuth Test (Broken State)</h2>
                         <p style={styles.hint}>Test OAuth callback without proper state validation</p>
                         <button onClick={handleOAuth} style={styles.button}>Test OAuth Callback</button>
                         {oauthResult && (
