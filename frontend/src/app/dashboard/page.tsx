@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ChatInterface from '@/components/ChatInterface';
-import { fetchAPI, profileAPI, uploadAPI, oauthAPI, challengesAPI, progressAPI, leaderboardAPI } from '@/lib/api';
+import { fetchAPI, profileAPI, uploadAPI, oauthAPI, challengesAPI, progressAPI } from '@/lib/api';
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('overview');
@@ -18,7 +18,7 @@ export default function Dashboard() {
     // New state for progress and challenges
     const [userProgress, setUserProgress] = useState<any>(null);
     const [challenges, setChallenges] = useState<any[]>([]);
-    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
     const [selectedChallenge, setSelectedChallenge] = useState<any>(null);
     const [flagInput, setFlagInput] = useState('');
     const [flagResult, setFlagResult] = useState('');
@@ -28,15 +28,13 @@ export default function Dashboard() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [progressData, challengesData, leaderboardData] = await Promise.all([
+                const [progressData, challengesData] = await Promise.all([
                     progressAPI.getProgress('default_user'),
-                    challengesAPI.list(),
-                    leaderboardAPI.get(10)
+                    challengesAPI.list()
                 ]);
 
                 setUserProgress(progressData);
                 setChallenges(challengesData);
-                setLeaderboard(leaderboardData.leaderboard || []);
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
             } finally {
@@ -266,38 +264,6 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {activeTab === 'leaderboard' && (
-                    <div>
-                        <h2>🏆 Leaderboard</h2>
-                        <div style={styles.panel}>
-                            <p style={styles.hint}>Top 10 hackers by points earned</p>
-                            {leaderboard.length > 0 ? (
-                                <table style={styles.table}>
-                                    <thead>
-                                        <tr>
-                                            <th style={styles.th}>Rank</th>
-                                            <th style={styles.th}>Username</th>
-                                            <th style={styles.th}>Points</th>
-                                            <th style={styles.th}>Challenges Solved</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {leaderboard.map((user: any, index: number) => (
-                                            <tr key={user.user_id} style={index % 2 === 0 ? { background: '#f9f9f9' } : {}}>
-                                                <td style={styles.td}>{index + 1}</td>
-                                                <td style={styles.td}>{user.username || user.user_id}</td>
-                                                <td style={styles.td}><strong>{user.total_points}</strong></td>
-                                                <td style={styles.td}>{user.solved_challenges?.length || 0}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            ) : (
-                                <p>No leaderboard data yet. Be the first to solve challenges!</p>
-                            )}
-                        </div>
-                    </div>
-                )}
 
                 {activeTab === 'chat' && (
                     <div>

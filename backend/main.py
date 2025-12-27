@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-app = FastAPI(title="K-AIWHL v2.0 - DVWA-Style CTF", version="2.0.0")
+app = FastAPI(title="K-AIWHL v2.0 - Modern AI CTF Lab", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -73,7 +73,7 @@ async def root():
     return {
         "name": "K-AIWHL v2.0",
         "version": "2.0.0",
-        "description": "DVWA-Style Modern Penetration Testing Lab",
+        "description": "Modern AI-Integrated Penetration Testing Lab",
         "total_challenges": 25,  # All challenges implemented
         "total_points": 1100,  # 5 low (50) + 10 medium (250) + 6 high (300) + 4 extreme (400) = 1100
         "categories": ["authentication", "injection", "file", "llm", "access_control", "ssrf"],
