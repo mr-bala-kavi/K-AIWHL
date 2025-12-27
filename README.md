@@ -79,6 +79,101 @@ To remove all data and start fresh:
 docker-compose down -v
 ```
 
+## 🐉 Kali Linux Setup
+
+### Installation on Kali Linux
+
+```bash
+# 1. Install Docker and Docker Compose
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y docker.io docker-compose
+
+# 2. Start Docker service
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 3. Add your user to docker group (to run without sudo)
+sudo usermod -aG docker $USER
+newgrp docker
+
+# 4. Verify installation
+docker --version
+docker-compose --version
+```
+
+### Running the Lab on Kali
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/mr-bala-kavi/K-AIWHL.git
+cd K-AIWHL
+
+# 2. Start all services
+docker-compose up -d
+
+# 3. Wait for services to initialize (~2-3 minutes)
+docker-compose logs -f
+
+# 4. Verify the lab is running
+curl http://localhost:5000/health
+# Expected: {"status":"healthy","service":"backend"}
+
+# 5. Check challenge count
+curl http://localhost:5000/api/challenges | jq '. | length'
+# Expected: 25
+```
+
+### Testing with Kali Tools
+
+**Burp Suite:**
+```bash
+# Start Burp Suite
+burpsuite &
+
+# Configure proxy: 127.0.0.1:8080
+# Navigate to: http://localhost:3000/dashboard
+```
+
+**Quick SQL Injection Test:**
+```bash
+# Test auth bypass (Challenge: auth_sql_low)
+curl -X POST http://localhost:5000/challenges/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin'\'' OR '\''1'\''='\''1'\''--","password":"anything"}'
+```
+
+**Submit Your First Flag:**
+```bash
+# Submit flag and earn 10 points
+curl -X POST http://localhost:5000/api/challenges/submit-flag \
+  -H "Content-Type: application/json" \
+  -d '{
+    "challenge_id": "auth_sql_low",
+    "flag": "flag{AUTH_L1_sql_1nj3ct_l0g1n}",
+    "used_hint": false
+  }'
+```
+
+**Other Kali Tools:**
+```bash
+# SQLMap
+sqlmap -u "http://localhost:5000/challenges/auth/login" \
+  --data='{"username":"test","password":"test"}' \
+  --method=POST --headers="Content-Type: application/json"
+
+# Nikto web scanner
+nikto -h http://localhost:5000
+
+# Nmap port scanning
+nmap -sV -p- localhost
+```
+
+### Access Points
+- **Dashboard:** http://localhost:3000/dashboard
+- **Backend API:** http://localhost:5000
+- **API Documentation:** http://localhost:5000/docs
+- **Upload Service:** http://localhost:8000
+
 ## 📚 Technology Stack
 
 | Component | Technology | Port |
