@@ -1,0 +1,74 @@
+{
+  "flags": [
+    {
+      "id": 1,
+      "category": "NoSQL Injection",
+      "flag": "flag{KAI_NOSQL_m0ng0_1nj3ct10n_w0rks}",
+      "vulnerability": "NoSQL injection in login endpoint",
+      "location": "Backend /api/auth/login"
+    },
+    {
+      "id": 2,
+      "category": "JWT Forgery",
+      "flag": "flag{KAI_JWT_n0_alg_n0_pr0bl3m}",
+      "vulnerability": "JWT accepts algorithm 'none'",
+      "location": "Backend JWT validation"
+    },
+    {
+      "id": 3,
+      "category": "Broken OAuth",
+      "flag": "flag{KAI_OAUTH_st4t3_c0nfus10n}",
+      "vulnerability": "OAuth state parameter not validated",
+      "location": "Backend /api/auth/oauth/callback"
+    },
+    {
+      "id": 4,
+      "category": "SSRF",
+      "flag": "flag{KAI_SSRF_1nt3rn4l_4cc3ss}",
+      "vulnerability": "Server-Side Request Forgery in URL fetcher",
+      "location": "Backend /api/fetch/url"
+    },
+    {
+      "id": 5,
+      "category": "Prompt Injection",
+      "flag": "flag{KAI_LLM_pr0mpt_pwn3d}",
+      "vulnerability": "LLM prompt injection to leak system prompt",
+      "location": "Backend /api/llm/chat - system prompt"
+    },
+    {
+      "id": 6,
+      "category": "RAG Poisoning",
+      "flag": "flag{KAI_RAG_v3ct0r_p0is0n3d}",
+      "vulnerability": "Vector database poisoning to influence RAG responses",
+      "location": "ChromaDB poisoned vectors"
+    },
+    {
+      "id": 7,
+      "category": "LLM XSS",
+      "flag": "flag{KAI_XSS_4i_g3n3r4t3d_3v1l}",
+      "vulnerability": "XSS via unsanitized LLM output rendering",
+      "location": "Frontend ChatInterface component"
+    },
+    {
+      "id": 8,
+      "category": "Upload RCE",
+      "flag": "flag{KAI_RCE_upl04d_pwn4g3}",
+      "vulnerability": "Remote Code Execution via insecure file upload",
+      "location": "Upload service /upload - pickle deserialization"
+    },
+    {
+      "id": 9,
+      "category": "IDOR",
+      "flag": "flag{KAI_IDOR_pr0f1l3_l3ak3d}",
+      "vulnerability": "Insecure Direct Object Reference in profile endpoint",
+      "location": "Backend /api/profile/{user_id}"
+    },
+    {
+      "id": 10,
+      "category": "CORS",
+      "flag": "flag{KAI_CORS_cr0ss_0r1g1n_pwn}",
+      "vulnerability": "CORS misconfiguration with wildcard origin",
+      "location": "Backend CORS middleware"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: kaiwhl-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ctf
+    volumes:
+      - ./databases/mongo-init/seed.js:/docker-entrypoint-initdb.d/seed.js
+      - mongodb_data:/data/db
+    networks:
+      - kaiwhl-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: kaiwhl-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - kaiwhl-network
+
+  # ChromaDB Vector Database
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: kaiwhl-chromadb
+    ports:
+      - "8001:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+    volumes:
+      - chromadb_data:/chroma/chroma
+    networks:
+      - kaiwhl-network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kaiwhl-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/ctf
+      - REDIS_URL=redis://redis:6379
+      - CHROMADB_URL=http://chromadb:8000
+      - JWT_SECRET=super_secret_key_do_not_use_in_production
+      - OAUTH_CLIENT_ID=fake_client_id
+      - OAUTH_CLIENT_SECRET=fake_client_secret
+    depends_on:
+      - mongodb
+      - redis
+      - chromadb
+    networks:
+      - kaiwhl-network
+    volumes:
+      - ./backend:/app
+
+  # Upload Service (Python Flask)
+  upload-service:
+    build:
+      context: ./upload-service
+      dockerfile: Dockerfile
+    container_name: kaiwhl-upload
+    ports:
+      - "8000:8000"
+    networks:
+      - kaiwhl-network
+    volumes:
+      - ./upload-service:/app
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kaiwhl-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - NEXT_PUBLIC_UPLOAD_URL=http://localhost:8000
+    depends_on:
+      - backend
+      - upload-service
+    networks:
+      - kaiwhl-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+networks:
+  kaiwhl-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  chromadb_data:

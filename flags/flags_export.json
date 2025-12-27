@@ -1,0 +1,202 @@
+{
+  "auth_sql_low": {
+    "flag": "flag{AUTH_L1_sql_1nj3ct_l0g1n}",
+    "difficulty": "low",
+    "category": "authentication",
+    "points": 10,
+    "location": "database.users.username='admin' OR '1'='1'",
+    "description": "Basic SQL injection to bypass login"
+  },
+  "auth_sql_medium": {
+    "flag": "flag{AUTH_M1_bl1nd_sqli_h4sh}",
+    "difficulty": "medium",
+    "category": "authentication",
+    "points": 25,
+    "location": "database.admin_secrets WHERE key='password_hash'",
+    "description": "Blind SQL injection to extract password hash"
+  },
+  "auth_sql_high": {
+    "flag": "flag{AUTH_H1_s3c0nd_0rd3r_pwn}",
+    "difficulty": "high",
+    "category": "authentication",
+    "points": 50,
+    "location": "database.user_profiles.notes (stored XSS + SQLi)",
+    "description": "Second-order SQL injection via profile update"
+  },
+  "session_fixation": {
+    "flag": "flag{SESS_M1_f1x4t10n_pwn3d}",
+    "difficulty": "medium",
+    "category": "authentication",
+    "points": 25,
+    "location": "Cookie: session_id manipulation",
+    "description": "Session fixation attack"
+  },
+  "jwt_race": {
+    "flag": "flag{JWT_H1_r4c3_c0nd1t10n}",
+    "difficulty": "high",
+    "category": "authentication",
+    "points": 50,
+    "location": "JWT claim + race condition in token refresh",
+    "description": "JWT algorithm confusion + race condition"
+  },
+  "cmd_injection_low": {
+    "flag": "flag{CMD_L1_p1ng_1nj3ct10n}",
+    "difficulty": "low",
+    "category": "injection",
+    "points": 10,
+    "location": "Command output in ping utility",
+    "description": "Command injection in ping functionality"
+  },
+  "nosql_blind": {
+    "flag": "flag{NOSQL_M1_bl1nd_1nj3ct}",
+    "difficulty": "medium",
+    "category": "injection",
+    "points": 25,
+    "location": "MongoDB query boolean response",
+    "description": "Blind NoSQL injection"
+  },
+  "ldap_injection": {
+    "flag": "flag{LDAP_H1_d1r3ct0ry_pwn}",
+    "difficulty": "high",
+    "category": "injection",
+    "points": 50,
+    "location": "LDAP directory search results",
+    "description": "LDAP injection to enumerate directory"
+  },
+  "xxe_extreme": {
+    "flag": "flag{XXE_E1_1nt3rn4l_f1l3s}",
+    "difficulty": "extreme",
+    "category": "injection",
+    "points": 100,
+    "location": "File: /etc/kaiwhl/secrets.txt via XXE",
+    "description": "XXE to read internal files"
+  },
+  "ssti_medium": {
+    "flag": "flag{SSTI_M1_t3mpl4t3_pwn}",
+    "difficulty": "medium",
+    "category": "injection",
+    "points": 25,
+    "location": "Template rendering output",
+    "description": "Server-Side Template Injection"
+  },
+  "upload_low": {
+    "flag": "flag{UPLOAD_L1_unr3str1ct3d}",
+    "difficulty": "low",
+    "category": "file",
+    "points": 10,
+    "location": "Uploaded file content",
+    "description": "Unrestricted file upload"
+  },
+  "lfi_medium": {
+    "flag": "flag{LFI_M1_l0c4l_f1l3_r34d}",
+    "difficulty": "medium",
+    "category": "file",
+    "points": 25,
+    "location": "File: /var/www/config/secrets.conf",
+    "description": "Local File Inclusion"
+  },
+  "rfi_high": {
+    "flag": "flag{RFI_H1_r3m0t3_c0d3_3x3c}",
+    "difficulty": "high",
+    "category": "file",
+    "points": 50,
+    "location": "Remote file execution output",
+    "description": "Remote File Inclusion"
+  },
+  "polyglot_extreme": {
+    "flag": "flag{POL_E1_p0lygl0t_byp4ss}",
+    "difficulty": "extreme",
+    "category": "file",
+    "points": 100,
+    "location": "Polyglot file magic bytes + execution",
+    "description": "Polyglot file upload bypass"
+  },
+  "llm_prompt_low": {
+    "flag": "flag{LLM_L1_pr0mpt_l34k}",
+    "difficulty": "low",
+    "category": "llm",
+    "points": 10,
+    "location": "LLM system prompt leak",
+    "description": "Basic prompt injection"
+  },
+  "llm_jailbreak_medium": {
+    "flag": "flag{LLM_M1_j41lbr34k_pwn}",
+    "difficulty": "medium",
+    "category": "llm",
+    "points": 25,
+    "location": "Encoded jailbreak response",
+    "description": "LLM jailbreak with encoded payload"
+  },
+  "rag_poison_high": {
+    "flag": "flag{RAG_H1_p0is0n_r3tr13v3}",
+    "difficulty": "high",
+    "category": "llm",
+    "points": 50,
+    "location": "Poisoned vector retrieval",
+    "description": "RAG poisoning and retrieval"
+  },
+  "context_smuggle_extreme": {
+    "flag": "flag{CTX_E1_c0nt3xt_smug}",
+    "difficulty": "extreme",
+    "category": "llm",
+    "points": 100,
+    "location": "Multi-turn context manipulation",
+    "description": "Context smuggling attack"
+  },
+  "idor_low": {
+    "flag": "flag{IDOR_L1_us3r_4cc3ss}",
+    "difficulty": "low",
+    "category": "access_control",
+    "points": 10,
+    "location": "Base64 in user profile secret_data field",
+    "description": "IDOR to access other users"
+  },
+  "mass_assign_medium": {
+    "flag": "flag{MASS_M1_4ss1gn_pwn}",
+    "difficulty": "medium",
+    "category": "access_control",
+    "points": 25,
+    "location": "User role escalation via mass assignment",
+    "description": "Mass assignment vulnerability"
+  },
+  "race_priv_high": {
+    "flag": "flag{PRIV_H1_r4c3_3sc4l4t3}",
+    "difficulty": "high",
+    "category": "access_control",
+    "points": 50,
+    "location": "Admin role via race condition",
+    "description": "Privilege escalation via race condition"
+  },
+  "oauth_csrf_extreme": {
+    "flag": "flag{OAUTH_E1_t0k3n_ch41n}",
+    "difficulty": "extreme",
+    "category": "access_control",
+    "points": 100,
+    "location": "OAuth token + CSRF chain exploitation",
+    "description": "OAuth token theft + CSRF chain"
+  },
+  "ssrf_internal_medium": {
+    "flag": "flag{SSRF_M1_1nt3rn4l_4p1}",
+    "difficulty": "medium",
+    "category": "ssrf",
+    "points": 25,
+    "location": "Internal API http://internal-api:8080/admin/flag",
+    "description": "SSRF to access internal API"
+  },
+  "crlf_high": {
+    "flag": "flag{CRLF_H1_h34d3r_1nj3ct}",
+    "difficulty": "high",
+    "category": "ssrf",
+    "points": 50,
+    "location": "CRLF injection in headers \u2192 session hijack",
+    "description": "SSRF + CRLF header injection"
+  },
+  "cloud_metadata_extreme": {
+    "flag": "flag{CLOUD_E1_m3t4d4t4_pwn}",
+    "difficulty": "extreme",
+    "category": "ssrf",
+    "points": 100,
+    "location": "http://169.254.169.254/latest/meta-data/flag",
+    "description": "SSRF to cloud metadata service"
+  }
+}

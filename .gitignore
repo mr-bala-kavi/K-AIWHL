@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+npm-debug.log*
+.next/
+out/
+
+# Docker
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Development artifacts (already removed)
+DELIVERY.md
+FINAL_TEST_REPORT.md
+TEST_RESULTS.md
+V2_PROGRESS.md
+SUMMARY.md
+INDEX.md
