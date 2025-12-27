@@ -30,10 +30,21 @@ Thumbs.db
 # Environment
 .env
 
-# Development artifacts (already removed)
+# Test scripts (keep local only)
+test-all-challenges.ps1
+test-*.ps1
+*.test.js
+
+# Development artifacts (keep local only)
 DELIVERY.md
 FINAL_TEST_REPORT.md
 TEST_RESULTS.md
 V2_PROGRESS.md
 SUMMARY.md
 INDEX.md
+
+# Logs and temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
